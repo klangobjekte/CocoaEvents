@@ -9,22 +9,27 @@ class QEvent;
 class QPoint;
 
 class AppleAppObserver;
-
+class QLineEdit;
+class QTextEdit;
+class QPushButton;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QMainWindow *parent = nullptr);
+    MainWindow(AppleAppObserver *observer,QMainWindow *parent = nullptr);
+
     QWidget *centralWidget=nullptr;
-    QLabel *textLabel = nullptr;
+    QTextEdit *textLabel = nullptr;
     QVBoxLayout *vBoxLayout = nullptr;
+    QPushButton *testButton;
     ~MainWindow();
     virtual bool eventFilter(QObject *watched, QEvent *event);
 public slots:
     void setText(QString text);
+    void on_testButton_clicked(bool clicked);
 private:
-    AppleAppObserver *observer= nullptr;
+    AppleAppObserver *mObserver= nullptr;
     QPoint dragStartPosition;
 
 };

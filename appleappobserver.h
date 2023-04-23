@@ -25,6 +25,8 @@ public:
     AppleAppObserver(QObject *parent = nullptr);
     ~AppleAppObserver();
     void viewDidLoad();
+    void setObserverEnabled(bool enabled);
+
     AppleAppObserverPrivate *appleAppObserverPrivate(){
         return dd;
     }

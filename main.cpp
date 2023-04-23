@@ -1,3 +1,4 @@
+#include "appleappobserver.h"
 #include "mainwindow.h"
 #include <QApplication>
 
@@ -12,8 +13,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-
-    MainWindow w;
+    AppleAppObserver o;
+    MainWindow w(&o);
+    w.setGeometry(-100,100,640,320);
     w.show();
 
 #ifdef Q_OS_MAC

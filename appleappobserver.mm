@@ -82,6 +82,7 @@ private:
     AXUIElementRef			    _currentUIElement=NULL;
     BOOL				    _currentlyInteracting;
     BOOL				    _highlightLockedUIElement;
+    BOOL                                    _observerEnabled = true;
 
 public slots:
     QString hoverApplicationName(){return _hoverApplicationName;}
@@ -92,14 +93,29 @@ public slots:
      */
     void performTimerBasedUpdate()
     {
-        updateCurrentUIElement();
-        //[NSTimer scheduledTimerWithTimeInterval:0.1 target: self
-        //                                            selector:@selector(performTimerBasedUpdate)
-        //                                            userInfo:nil
-        //                                            repeats:NO];
+        //! This makes the Dialog Slow
+        //! Make an If Condition only for a soecific WinowName!!
+        if(_observerEnabled)
+{
+            updateCurrentUIElement();
+}
+        else //! send an empty notifier
+{
+            sendNotifier();
+
+}
+       // [NSTimer scheduledTimerWithTimeInterval:0.1 target: NULL
+       //                                             selector:@selector(performTimerBasedUpdate)
+       //                                             userInfo:nil
+       //                                             repeats:NO];
         QTimer::singleShot(100, this, SLOT(performTimerBasedUpdate()));
+
     }
 
+    void setObserverEnabled(bool enabled)
+    {
+      _observerEnabled = enabled;
+    }
 
 public:
 
@@ -135,19 +151,39 @@ public:
 
     void updateCurrentUIElement()
     {
-        //if (!isInteractionWindowVisible()) {
+        if (!isInteractionWindowVisible()) {
 
             // The current mouse position with origin at top right.
             NSPoint cocoaPoint = [NSEvent mouseLocation];
 
-            // Only ask for the UIElement under the mouse if has moved since the last check.
-            if (!NSEqualPoints(cocoaPoint, _lastMousePoint)) {
 
-                CGPoint pointAsCGPoint = [UIElementUtilities carbonScreenPointFromCocoaScreenPoint:cocoaPoint];
+
+            // Only ask for the UIElement under the mouse if has moved since the last check.
+            if (!NSEqualPoints(cocoaPoint, _lastMousePoint))
+            {
+                bool test = true;
+
+              //!Makes QDialog slow but gets the right point
+               CGPoint pointAsCGPoint = [UIElementUtilities carbonScreenPointFromCocoaScreenPoint:cocoaPoint];
+
+              //! Get the wrong hiht Position
+              //CGPoint pointAsCGPoint = cocoaPoint;
+
+
+              //NSLog(@"+++++++++++++++++++++++++++++++++++++");
+              //NSLog(@"cocoaPoint.x \"%f\".", cocoaPoint.x);
+              //NSLog(@"cocoaPoint.y \"%f\".", cocoaPoint.y);
+              //NSLog(@"pointAsCGPoint.x \"%f\".", pointAsCGPoint.x);
+              //NSLog(@"pointAsCGPoint.y \"%f\".", pointAsCGPoint.y);
+
 
                 AXUIElementRef newElement = NULL;
+               if(pointAsCGPoint.x == 0.0 || pointAsCGPoint.y == 0.0){
+               //test = false;
+                }
 
-                /* If the interaction window is not visible, but we still think we are interacting, change that */
+
+                //! If the interaction window is not visible, but we still think we are interacting, change that
                 //if (_currentlyInteracting) {
                 //    _currentlyInteracting = ! _currentlyInteracting;
                 //    [_inspectorWindowController indicateUIElementIsLocked:_currentlyInteracting];
@@ -155,12 +191,23 @@ public:
 
                 // Ask Accessibility API for UI Element under the mouse
                 // And testupdate the display if a different UIElement
-                if (AXUIElementCopyElementAtPosition( _systemWideElement, pointAsCGPoint.x,
+
+                if (test &&
+                          //! This Slows Down openFileDialogs:
+                          AXUIElementCopyElementAtPosition( _systemWideElement,
+                                                      pointAsCGPoint.x,
                                                       pointAsCGPoint.y,
                                                       &newElement ) == kAXErrorSuccess
+                          //! And here the Coordinates are Wrong
+                          //AXUIElementCopyElementAtPosition( _systemWideElement,
+                          //                     float(cocoaPoint.x),
+                          //                     float(cocoaPoint.y),
+                          //                     &newElement ) == kAXErrorSuccess
                         && newElement
                         && (currentUIElement() == NULL ||
-                            ! CFEqual( currentUIElement(), newElement )))
+                            ! CFEqual( currentUIElement(), newElement ))
+
+                )
                 {
 
                     //NSLog(@"titleOfUIElement \"%@\".", [UIElementUtilities titleOfUIElement:newElement]);
@@ -169,14 +216,13 @@ public:
                     //NSLog(@"lineageDescriptionOfUIElement \"%@\".", [UIElementUtilities lineageDescriptionOfUIElement:newElement]);
 
 
-                    //QString qStringDescriptionOfUIElement = qt_mac_NSStringToQString([UIElementUtilities stringDescriptionOfUIElement:newElement]);
 
-                    //NSLog(@"descriptionForUIElement \"%@\".", [UIElementUtilities descriptionForUIElement:newElement
-                    //attribute:theName beingVerbose:false]]);
+                    //NSString *theName = nil;
+                    //NSLog(@"descriptionForUIElement \"%@\".", [UIElementUtilities descriptionForUIElement:newElement attribute:theName beingVerbose:YES]);
 
-                    NSString *attributeName = nil;
-                    NSArray *theNames = nil;
-                    Boolean theSettableFlag = false;
+                    //NSString *attributeName = nil;
+                    //NSArray *theNames = nil;
+                    //Boolean theSettableFlag = false;
 
 
 
@@ -186,33 +232,32 @@ public:
                     //! lineage = abstammungsgruppe
                     lineagesOfUIElement = [UIElementUtilities lineageOfUIElement:newElement];
 
-/*
-                     QJsonArray jLineagesOfUIElement;
-                     QJsonObject jElement=
+
+                     for (id element in lineagesOfUIElement)
                      {
-                         {"CHANNEL_INDEX", chIndex},
-                         {"INTERLEAVE_INDEX", interleaved},
-                         {"NAME", name},
-                         {"FUNCTION", function},
-                     };
-                     */
-                     for (id element in lineagesOfUIElement) {
-                        NSLog(@"lineage \"%@\".", element);
-                        //NSLog(@"Element AXApplication: %@", [element valueForKey:@"AXApplication"]); // or element[@"asr"]
+                      NSLog(@"lineage \"%@\".", element);
+                      //! Crash
+                      //NSLog(@"Element AXApplication: %@", [element valueForKey:@"AXApplication"]); // or element[@"asr"]
+                      //NSLog(@"Element AXApplication: %@", [element valueForKey:@"asr"]); // or element[@"asr"]
 
                        QString qElement = qt_mac_NSStringToQString(element);
                        qElement.chop(1);
                        qElement.remove(0,1);
                        QStringList keyValue = qElement.split(":");
-                       if(keyValue.at(0)=="AXApplication"){
+                       if(keyValue.at(0)=="AXApplication")
+                       {
                            _hoverApplicationName = keyValue.at(1);
-                       //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
-                       sendNotifier();
+                           //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
+                          /**
+                            * @brief sendNotifier
+                            * send the sendNotifier (1100)
+                          */
+                          sendNotifier();
                        }
-                      if(keyValue.at(0)=="AXWindow")
-                           _hoverWindowName = keyValue.at(1);
-                       qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
-                       //qDebug() << "_hoverWindowName      " << _hoverWindowName;
+                      //if(keyValue.at(0)=="AXWindow")
+                      //     _hoverWindowName = keyValue.at(1);
+                      //qDebug() << "_hoverApplicationMame" << _hoverApplicationName;
+                      //qDebug() << "_hoverWindowName      " << _hoverWindowName;
 
 
                      }
@@ -239,27 +284,29 @@ public:
 
 
                     //[this setCurrentUIElement:newElement];
+
                     setCurrentUIElement(newElement);
+
                     //[self updateUIElementInfoWithAnimation:NO];
 
-                    /*
 
-                    NSArray* attributeNames = [UIElementUtilities attributeNamesOfUIElement:newElement];
-                    for (NSString *attributeName in attributeNames) {
-                        //NSLog(@"attributeName \"%@\".", attributeName);
+                    //NSArray* attributeNames = [UIElementUtilities attributeNamesOfUIElement:newElement];
+                    //for (NSString *attributeName in attributeNames) {
+                    //    //NSLog(@"attributeName \"%@\".", attributeName);
 
-                    }
-                    NSArray* actionNames = [UIElementUtilities actionNamesOfUIElement:newElement];
-                    for (NSString *actionName in actionNames) {
-                        //NSLog(@"actionName \"%@\".", actionName);
+                    //}
+                    //NSArray* actionNames = [UIElementUtilities actionNamesOfUIElement:newElement];
+                    //for (NSString *actionName in actionNames) {
+                    //    //NSLog(@"actionName \"%@\".", actionName);
 
-                    }
-                    */
+                    //}
+
                 }
 
                 _lastMousePoint = cocoaPoint;
             }
-        //}
+
+        }
     }
 
 
@@ -423,24 +470,24 @@ public:
                  then quit because we can't update the users status on app switch as we are meant to
                  (because we can't get notifications of application switches).
                  */
-            NSRunCriticalAlertPanel(@"'Enable access for assistive devices' is not enabled.", @"iChatStatusFromApplication requires that 'Enable access for assistive devices' in the 'Universal Access' preferences panel be enabled in order to monitor application switching.", @"Quit", nil, nil);
+            NSRunCriticalAlertPanel(@"'Enable access for assistive devices' is not enabled.", @"CocoaEvents requires that 'Enable access for assistive devices' in the 'Universal Access' preferences panel be enabled in order to monitor application switching.", @"Ok", nil, nil);
             //[NSApp terminate:self];
         }
 
-        //#define USE_APPLICATIONSWITCHED_CALLBACK
+        #define USE_APPLICATIONSWITCHED_CALLBACK
 #ifdef USE_APPLICATIONSWITCHED_CALLBACK
         _observers = [[NSMutableDictionary alloc] init];
 
         /* Register for activation notifications for all currently running applications */
         NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-        /*
+
              for(NSDictionary *application in [workspace launchedApplications]) {
 
              //[self registerForAppSwitchNotificationFor:application];
              NSLog(@"observer for application \"%@\".", [application valueForKey:@"NSApplicationName"]);
 
              }
-             */
+
 
 
 
@@ -510,6 +557,11 @@ QString AppleAppObserver::testForApplicationSwitched()
     //return staticFrontMostApplicationName;
     return dd->hoverApplicationName();
 }
+
+    void AppleAppObserver::setObserverEnabled(bool enabled)
+    {
+      dd->setObserverEnabled(enabled);
+    }
 
 void AppleAppObserver::viewDidLoad(){
     dd->viewDidLoad();

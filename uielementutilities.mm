@@ -174,16 +174,24 @@ NSString *const UIElementUtilitiesNoDescription = @"No Description";
     }
     }
 
-    if (foundScreen) {
-    CGFloat screenHeight = [foundScreen frame].size.height;
+    if (foundScreen)
+    {
+      CGFloat screenHeight = [foundScreen frame].size.height;
 
-    thePoint = CGPointMake(cocoaPoint.x, screenHeight - cocoaPoint.y - 1);
-    } else {
-    thePoint = CGPointMake(0.0, 0.0);
+      thePoint = CGPointMake(cocoaPoint.x, screenHeight - cocoaPoint.y - 1);
+      //thePoint = CGPointMake(cocoaPoint.x, cocoaPoint.y );
+    }
+    else {
+      thePoint = CGPointMake(0.0, 0.0);
     }
 
     return thePoint;
 }
+
+
+
+
+
 
 
 // -------------------------------------------------------------------------------

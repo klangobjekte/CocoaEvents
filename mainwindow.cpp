@@ -108,7 +108,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event){
 
     if(event->type() == 1100){
         //qDebug() << watched << event;
-        qDebug() << mObserver->testForApplicationSwitched();// << event->type();
+        qDebug()<< "mObserver->testForApplicationSwitched():" << mObserver->testForApplicationSwitched();// << event->type();
         setText(mObserver->testForApplicationSwitched()+" 1100");
 
     }

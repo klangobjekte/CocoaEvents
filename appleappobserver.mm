@@ -244,15 +244,19 @@ public:
                        qElement.chop(1);
                        qElement.remove(0,1);
                        QStringList keyValue = qElement.split(":");
-                       if(keyValue.at(0)=="AXApplication")
+                       if(!keyValue.empty())
                        {
-                           _hoverApplicationName = keyValue.at(1);
-                           //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
-                          /**
+                          if(keyValue.at(0)=="AXApplication")
+                          {
+                             _hoverApplicationName = keyValue.at(1);
+                            //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
+                            /**
                             * @brief sendNotifier
                             * send the sendNotifier (1100)
-                          */
-                          sendNotifier();
+                            */
+                            sendNotifier();
+                          }
+
                        }
                       //if(keyValue.at(0)=="AXWindow")
                       //     _hoverWindowName = keyValue.at(1);

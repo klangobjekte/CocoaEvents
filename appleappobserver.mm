@@ -96,20 +96,18 @@ public slots:
         //! This makes the Dialog Slow
         //! Make an If Condition only for a soecific WinowName!!
         if(_observerEnabled)
-{
+        {
             updateCurrentUIElement();
-}
+        }
         else //! send an empty notifier
-{
+        {
             sendNotifier();
-
-}
+        }
        // [NSTimer scheduledTimerWithTimeInterval:0.1 target: NULL
        //                                             selector:@selector(performTimerBasedUpdate)
        //                                             userInfo:nil
        //                                             repeats:NO];
         QTimer::singleShot(100, this, SLOT(performTimerBasedUpdate()));
-
     }
 
     void setObserverEnabled(bool enabled)
@@ -125,12 +123,10 @@ public:
         _currentUIElement = (AXUIElementRef)[(id)uiElement retain];
     }
 
-
     AXUIElementRef currentUIElement()
     {
         return _currentUIElement;
     }
-
     void registerReceiver(QObject* obj)
     {
         _eventReceivers.insert(obj);
@@ -140,10 +136,8 @@ public:
         _eventReceivers.erase(obj);
     }
 
-
     //NSString *frontMostAppName(){return frontMostAppName_;}
     //QString frontApplicationName(){return _frontApplicationName;}
-
     BOOL isInteractionWindowVisible()
     {
         return [[_interactionWindowController window] isVisible];
@@ -156,32 +150,30 @@ public:
             // The current mouse position with origin at top right.
             NSPoint cocoaPoint = [NSEvent mouseLocation];
 
-
-
             // Only ask for the UIElement under the mouse if has moved since the last check.
             if (!NSEqualPoints(cocoaPoint, _lastMousePoint))
             {
+
                 bool test = true;
 
-              //!Makes QDialog slow but gets the right point
-               CGPoint pointAsCGPoint = [UIElementUtilities carbonScreenPointFromCocoaScreenPoint:cocoaPoint];
+                //!Makes QDialog slow but gets the right point
+                CGPoint pointAsCGPoint = [UIElementUtilities carbonScreenPointFromCocoaScreenPoint:cocoaPoint];
 
-              //! Get the wrong hiht Position
-              //CGPoint pointAsCGPoint = cocoaPoint;
+                //! Get the wrong hiht Position
+                //CGPoint pointAsCGPoint = cocoaPoint;
 
-
-              //NSLog(@"+++++++++++++++++++++++++++++++++++++");
-              //NSLog(@"cocoaPoint.x \"%f\".", cocoaPoint.x);
-              //NSLog(@"cocoaPoint.y \"%f\".", cocoaPoint.y);
-              //NSLog(@"pointAsCGPoint.x \"%f\".", pointAsCGPoint.x);
-              //NSLog(@"pointAsCGPoint.y \"%f\".", pointAsCGPoint.y);
+                //NSLog(@"+++++++++++++++++++++++++++++++++++++");
+                //NSLog(@"cocoaPoint.x \"%f\".", cocoaPoint.x);
+                //NSLog(@"cocoaPoint.y \"%f\".", cocoaPoint.y);
+                //NSLog(@"pointAsCGPoint.x \"%f\".", pointAsCGPoint.x);
+                //NSLog(@"pointAsCGPoint.y \"%f\".", pointAsCGPoint.y);
 
 
                 AXUIElementRef newElement = NULL;
-               if(pointAsCGPoint.x == 0.0 || pointAsCGPoint.y == 0.0){
-               //test = false;
+                if(pointAsCGPoint.x == 0.0 || pointAsCGPoint.y == 0.0)
+                {
+                    //test = false;
                 }
-
 
                 //! If the interaction window is not visible, but we still think we are interacting, change that
                 //if (_currentlyInteracting) {
@@ -206,16 +198,12 @@ public:
                         && newElement
                         && (currentUIElement() == NULL ||
                             ! CFEqual( currentUIElement(), newElement ))
-
                 )
                 {
-
                     //NSLog(@"titleOfUIElement \"%@\".", [UIElementUtilities titleOfUIElement:newElement]);
                     //NSLog(@"descriptionOfAXDescriptionOfUIElement \"%@\".", [UIElementUtilities descriptionOfAXDescriptionOfUIElement:newElement]);
                     //NSLog(@"stringDescriptionOfUIElement \"%@\".", [UIElementUtilities stringDescriptionOfUIElement:newElement]);
                     //NSLog(@"lineageDescriptionOfUIElement \"%@\".", [UIElementUtilities lineageDescriptionOfUIElement:newElement]);
-
-
 
                     //NSString *theName = nil;
                     //NSLog(@"descriptionForUIElement \"%@\".", [UIElementUtilities descriptionForUIElement:newElement attribute:theName beingVerbose:YES]);
@@ -223,109 +211,72 @@ public:
                     //NSString *attributeName = nil;
                     //NSArray *theNames = nil;
                     //Boolean theSettableFlag = false;
-
-
-
                     //NSLog(@"AXApplication \"%@\".", [UIElementUtilities descriptionForUIElement:newElement attribute:@"AXApplication" beingVerbose:true]);
 
                     NSMutableArray *lineagesOfUIElement = [[NSMutableArray alloc] init];
                     //! lineage = abstammungsgruppe
                     lineagesOfUIElement = [UIElementUtilities lineageOfUIElement:newElement];
 
+                    for (id element in lineagesOfUIElement)
+                    {
+                        NSLog(@"lineage \"%@\".", element);
+                        //! Crash
+                        //NSLog(@"Element AXApplication: %@", [element valueForKey:@"AXApplication"]); // or element[@"asr"]
+                        //NSLog(@"Element AXApplication: %@", [element valueForKey:@"asr"]); // or element[@"asr"]
 
-                     for (id element in lineagesOfUIElement)
-                     {
-                      NSLog(@"lineage \"%@\".", element);
-                      //! Crash
-                      //NSLog(@"Element AXApplication: %@", [element valueForKey:@"AXApplication"]); // or element[@"asr"]
-                      //NSLog(@"Element AXApplication: %@", [element valueForKey:@"asr"]); // or element[@"asr"]
-
-                       QString qElement = qt_mac_NSStringToQString(element);
-                       qElement.chop(1);
-                       qElement.remove(0,1);
-                       QStringList keyValue = qElement.split(":");
-                       if(!keyValue.empty())
-                       {
-                          if(keyValue.at(0)=="AXApplication")
-                          {
-                             _hoverApplicationName = keyValue.at(1);
-                            //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
-                            /**
-                            * @brief sendNotifier
-                            * send the sendNotifier (1100)
-                            */
-                            sendNotifier();
-                          }
-
-                       }
-                      //if(keyValue.at(0)=="AXWindow")
-                      //     _hoverWindowName = keyValue.at(1);
-                      //qDebug() << "_hoverApplicationMame" << _hoverApplicationName;
-                      //qDebug() << "_hoverWindowName      " << _hoverWindowName;
-
-
-                     }
-
-
-
-
-
+                        QString qElement = qt_mac_NSStringToQString(element);
+                        qElement.chop(1);
+                        qElement.remove(0,1);
+                        QStringList keyValue = qElement.split(":");
+                        if(!keyValue.empty())
+                        {
+                            if(keyValue.at(0)=="AXApplication")
+                            {
+                                _hoverApplicationName = keyValue.at(1);
+                                //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
+                                /**
+                                * @brief sendNotifier
+                                * send the sendNotifier (1100)
+                                */
+                                sendNotifier();
+                            }
+                        }
+                        //if(keyValue.at(0)=="AXWindow")
+                        //     _hoverWindowName = keyValue.at(1);
+                        //qDebug() << "_hoverApplicationMame" << _hoverApplicationName;
+                        //qDebug() << "_hoverWindowName      " << _hoverWindowName;
+                    }
                     //NSLog(@"jsonlineagesOfUIElement \"%@\".", jsonlineagesOfUIElement);
-
-
-
-
-
-
-
-//(id)valueForKey:(NSString *)key;
-
-                   //to extract items
-                     //NSDictionary *items = [[[jsonlineagesOfUIElement objectForKey:@"items"] JSONValue] objectAtIndex:0];
-
-
+                    //(id)valueForKey:(NSString *)key;
+                    //to extract items
+                    //NSDictionary *items = [[[jsonlineagesOfUIElement objectForKey:@"items"] JSONValue] objectAtIndex:0];
                     //NSLog(@"Element AXApplication: %@", [lineagesOfUIElement objectForKey:@"AXApplication"]); // or element[@"asr"]
-
-
                     //[this setCurrentUIElement:newElement];
 
                     setCurrentUIElement(newElement);
 
                     //[self updateUIElementInfoWithAnimation:NO];
 
-
                     //NSArray* attributeNames = [UIElementUtilities attributeNamesOfUIElement:newElement];
                     //for (NSString *attributeName in attributeNames) {
                     //    //NSLog(@"attributeName \"%@\".", attributeName);
-
                     //}
                     //NSArray* actionNames = [UIElementUtilities actionNamesOfUIElement:newElement];
                     //for (NSString *actionName in actionNames) {
                     //    //NSLog(@"actionName \"%@\".", actionName);
-
                     //}
-
                 }
-
                 _lastMousePoint = cocoaPoint;
             }
-
         }
     }
-
-
-
-
-
-
 
     /*
          Updates the current status and icon of users in iChat and "iChatStatus" window.
          Sets the user's status and icon to the fronmost application's name and icon.
-         */
+    */
     void applicationSwitched()
     {
-
         //frontMostAppName_=nil;
         /* Get information about the current active application */
         NSRunningApplication *frontMostApp;
@@ -336,13 +287,12 @@ public:
 
             for (NSRunningApplication *application in runningApplications) {
                 //NSLog(@"runningApplications \"%@\".", [application localizedName]);
-
                 if([application isActive])
                 {
                     frontMostApp = application;
                 }
             }
-*/
+        */
         /* Get the application's process id  */
         pid_t switchedPid = [frontMostApp processIdentifier];
         //NSLog(@"applicationSwitched \"%@\".", [frontMostApp localizedName]);
@@ -356,8 +306,6 @@ public:
             frontMostAppName_ = [frontMostApp localizedName];
             if(frontMostAppName_)
                 staticFrontMostApplicationName = qt_mac_NSStringToQString(frontMostAppName_);
-
-
 #define HIDE_NOW
 #ifndef HIDE_NOW
             /* Only update iChat's status if it is running and the current status is set to available */
@@ -398,11 +346,10 @@ public:
         }
     }
 
-    void sendNotifier(){
+    void sendNotifier()
+    {
         for (auto iter= _eventReceivers.begin(); iter != _eventReceivers.end(); ++iter)
             QCoreApplication::postEvent(*iter, new SwitchEvent());
-
-
     }
 
     // register all running applictions to listen to the kAXApplicationActivatedNotification event
@@ -434,9 +381,6 @@ public:
                     error = AXObserverAddNotification(observer, element, kAXFocusedWindowChangedNotification, this);
 
                     error = AXObserverAddNotification(observer, element, kAXApplicationDeactivatedNotification, this);
-
-
-
                     if( error != kAXErrorSuccess) // _bridge cast cause of arc clang specific
                     {
                         NSLog(@"Failed to add Notification event error %d", error);
@@ -461,40 +405,35 @@ public:
         }
     }
 
-    void viewDidLoad() {
-
-
+    void viewDidLoad()
+    {
         // Do any additional setup after loading the view.
-
-
         /* Check if 'Enable access for assistive devices' is enabled. */
-        if(!AXAPIEnabled()) {
+        if(!AXAPIEnabled())
+        {
             /*
-                 'Enable access for assistive devices' is not enabled, so we will alert the user,
-                 then quit because we can't update the users status on app switch as we are meant to
-                 (because we can't get notifications of application switches).
-                 */
+            'Enable access for assistive devices' is not enabled, so we will alert the user,
+            then quit because we can't update the users status on app switch as we are meant to
+            (because we can't get notifications of application switches).
+            */
             NSRunCriticalAlertPanel(@"'Enable access for assistive devices' is not enabled.", @"CocoaEvents requires that 'Enable access for assistive devices' in the 'Universal Access' preferences panel be enabled in order to monitor application switching.", @"Ok", nil, nil);
             //[NSApp terminate:self];
         }
 
-        #define USE_APPLICATIONSWITCHED_CALLBACK
+#define USE_APPLICATIONSWITCHED_CALLBACK
 #ifdef USE_APPLICATIONSWITCHED_CALLBACK
+        if(AXAPIEnabled())
+        {
         _observers = [[NSMutableDictionary alloc] init];
 
         /* Register for activation notifications for all currently running applications */
         NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
-
-             for(NSDictionary *application in [workspace launchedApplications]) {
+        for(NSDictionary *application in [workspace launchedApplications])
+        {
 
              //[self registerForAppSwitchNotificationFor:application];
              NSLog(@"observer for application \"%@\".", [application valueForKey:@"NSApplicationName"]);
-
-             }
-
-
-
-
+        }
         NSArray<NSRunningApplication *> *runningApplications =  [workspace runningApplications];
 
         for (id application in runningApplications)
@@ -503,12 +442,11 @@ public:
         }
 
         applicationSwitched();
+        }
 #endif
-
         _systemWideElement = AXUIElementCreateSystemWide();
         performTimerBasedUpdate();
     }
-
 };
 
 

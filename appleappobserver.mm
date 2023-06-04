@@ -115,6 +115,11 @@ public slots:
       _observerEnabled = enabled;
     }
 
+    bool isObserverEnabled()
+    {
+      return _observerEnabled;
+    }
+
 public:
 
     void setCurrentUIElement(AXUIElementRef uiElement)
@@ -217,37 +222,41 @@ public:
                     //! lineage = abstammungsgruppe
                     lineagesOfUIElement = [UIElementUtilities lineageOfUIElement:newElement];
 
-                    for (id element in lineagesOfUIElement)
-                    {
-                        NSLog(@"lineage \"%@\".", element);
-                        //! Crash
-                        //NSLog(@"Element AXApplication: %@", [element valueForKey:@"AXApplication"]); // or element[@"asr"]
-                        //NSLog(@"Element AXApplication: %@", [element valueForKey:@"asr"]); // or element[@"asr"]
+                    if(lineagesOfUIElement.count > 0){
 
-                        QString qElement = qt_mac_NSStringToQString(element);
-                        qElement.chop(1);
-                        qElement.remove(0,1);
-                        QStringList keyValue = qElement.split(":");
-                        if(!keyValue.empty())
-                        {
-                            if(keyValue.at(0)=="AXApplication")
-                            {
-                                _hoverApplicationName = keyValue.at(1);
-                                //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
-                                /**
-                                * @brief sendNotifier
-                                * send the sendNotifier (1100)
-                                */
-                                sendNotifier();
-                            }
-                        }
-                        //if(keyValue.at(0)=="AXWindow")
-                        //     _hoverWindowName = keyValue.at(1);
-                        //qDebug() << "_hoverApplicationMame" << _hoverApplicationName;
-                        //qDebug() << "_hoverWindowName      " << _hoverWindowName;
+                      for (id element in lineagesOfUIElement)
+                      {
+                          //NSLog(@"lineage \"%@\".", element);
+
+                          //! Crash
+                          //NSLog(@"Element AXApplication: %@", [element valueForKey:@"AXApplication"]); // or element[@"asr"]
+                          //NSLog(@"Element AXApplication: %@", [element valueForKey:@"asr"]); // or element[@"asr"]
+
+                          QString qElement = qt_mac_NSStringToQString(element);
+                          qElement.chop(1);
+                          qElement.remove(0,1);
+                          QStringList keyValue = qElement.split(":");
+                          if(!keyValue.empty())
+                          {
+                              if(keyValue.at(0)=="AXApplication")
+                              {
+                                  _hoverApplicationName = keyValue.at(1);
+                                  //qDebug() << "_hoverApplicationMame " << _hoverApplicationName;
+                                  /**
+                                  * @brief sendNotifier
+                                  * send the sendNotifier (1100)
+                                  */
+                                  sendNotifier();
+                              }
+                          }
+                          //if(keyValue.at(0)=="AXWindow")
+                          //     _hoverWindowName = keyValue.at(1);
+                          //qDebug() << "_hoverApplicationMame" << _hoverApplicationName;
+                          //qDebug() << "_hoverWindowName      " << _hoverWindowName;
+                      }
                     }
                     //NSLog(@"jsonlineagesOfUIElement \"%@\".", jsonlineagesOfUIElement);
-                    //(id)valueForKey:(NSString *)key;
+                    //(id)valueForKey:(NSString *)key;inspectorwindowcontroller
                     //to extract items
                     //NSDictionary *items = [[[jsonlineagesOfUIElement objectForKey:@"items"] JSONValue] objectAtIndex:0];
                     //NSLog(@"Element AXApplication: %@", [lineagesOfUIElement objectForKey:@"AXApplication"]); // or element[@"asr"]
@@ -407,7 +416,7 @@ public:
 
     void viewDidLoad()
     {
-        // Do any additional setup after loading the view.
+        // Do any additional setup after loading the view.rr
         /* Check if 'Enable access for assistive devices' is enabled. */
         if(!AXAPIEnabled())
         {
@@ -500,10 +509,15 @@ QString AppleAppObserver::testForApplicationSwitched()
     return dd->hoverApplicationName();
 }
 
-    void AppleAppObserver::setObserverEnabled(bool enabled)
-    {
-      dd->setObserverEnabled(enabled);
-    }
+void AppleAppObserver::setObserverEnabled(bool enabled)
+{
+  dd->setObserverEnabled(enabled);
+}
+
+bool AppleAppObserver::isObserverEnabled()
+{
+  return  dd->isObserverEnabled();
+}
 
 void AppleAppObserver::viewDidLoad(){
     dd->viewDidLoad();

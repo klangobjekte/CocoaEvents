@@ -26,6 +26,7 @@ public:
     ~AppleAppObserver();
     void viewDidLoad();
     void setObserverEnabled(bool enabled);
+    bool isObserverEnabled();
 
     AppleAppObserverPrivate *appleAppObserverPrivate(){
         return dd;
